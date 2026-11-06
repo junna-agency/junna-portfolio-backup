@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  /* Shared gutter, so absolutely positioned things can line up with `shell`. */
+  --gutter: clamp(1.25rem, 4.5vw, 4rem);
+  /* Wide cells so the page grid reads as structure, not graph paper. */
+  --grid: clamp(6rem, 16vw, 10rem);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-archivo);
+  --font-instrument: var(--font-instrument-sans);
+}
+
+@utility shell {
+  margin-inline: auto;
+  max-width: 1440px;
+  padding-inline: var(--gutter);
+}
+
+html {
+  /* Full-bleed elements use 100vw, which counts the scrollbar and would
+     otherwise add a horizontal scrollbar. `clip` rather than `hidden`:
+     hidden turns this into a scroll container and breaks position: sticky. */
+  overflow-x: clip;
+}
+
+/* Lenis clips overflow while stopped, which takes the scrollbar away for the
+   length of the splash and widens the page by its width — then shifts
+   everything back when the curtain lifts. Keep the bar in place instead.
+   Matches Lenis's own selector plus the element, to outweigh it. */
+html.lenis.lenis-stopped:not(.lenis-autoToggle) {
+  overflow-y: scroll;
+}
+
+/* The class is added by Cursor.tsx, so the native cursor survives if JS
+   never runs. Only on fine pointers — touch has nothing to replace. */
+@media (pointer: fine) {
+  html.has-custom-cursor,
+  html.has-custom-cursor * {
+    cursor: none;
+  }
+}
+
+/* Navbar label swap, as a die tipping toward the viewer: the incoming face is
+   hinged at the top edge and rotates down into the front, while the outgoing
+   one hinges at the bottom and keeps turning the same way, underneath. The
+   brightness dip stands in for the face falling out of the light. */
+@keyframes roll-in {
+  from {
+    transform: rotateX(-90deg);
+    filter: brightness(0.3);
+  }
+  to {
+    transform: rotateX(0deg);
+    filter: brightness(1);
+  }
+}
+
+@keyframes roll-out {
+  from {
+    transform: rotateX(0deg);
+    filter: brightness(1);
+  }
+  to {
+    transform: rotateX(90deg);
+    filter: brightness(0.3);
+  }
+}
+
+/* Scroll reveal. Transform + opacity only — layout is untouched, so the
+   project highlight's offsetTop stays honest while a row is still arriving.
+   Reduced motion shows the end state in CSS, before the observer runs. */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 1.25rem, 0);
+  transition:
+    opacity 500ms ease-out,
+    transform 500ms ease-out;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+.project-lightbox[open] {
+  display: flex;
+}
+
+.project-lightbox::backdrop {
+  background: rgb(0 0 0 / 88%);
+  backdrop-filter: blur(8px);
+}
+
+/* Native dialogs enter the top layer, above the fixed custom cursor. Restore
+   the platform cursor inside the lightbox instead of leaving no pointer. */
+@media (pointer: fine) {
+  .project-lightbox,
+  .project-lightbox * {
+    cursor: auto !important;
+  }
+}
+
+/* Sits on the opaque WebGL canvas. Behind it the grid would be invisible. */
+.page-grid {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.055) 1px, transparent 1px);
+  background-position: center;
+  background-size: var(--grid) var(--grid);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
